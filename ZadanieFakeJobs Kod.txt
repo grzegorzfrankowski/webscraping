@@ -1,0 +1,59 @@
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+
+URL = "https://realpython.github.io/fake-jobs/"
+page = requests.get(URL)
+print(page.text)
+
+soup = BeautifulSoup(page.content, "html.parser")
+soup.prettify()
+
+position = soup.find_all("h2", class_="title is-5")
+positionLista = []
+for p in position:
+    positionLista.append(p.text)
+print(positionLista)
+
+company = soup.find_all("h3", class_="subtitle is-6 company")
+companyLista = []
+for c in company:
+    companyLista.append(c.text)
+print(companyLista)
+
+location = soup.find_all("p", class_="location")
+locationLista = []
+for l in location:
+    miejsce = l.text.strip()
+    locationLista.append(miejsce)
+print(locationLista)
+
+date = soup.find_all("time")
+dateLista = []
+for d in date:
+    dateLista.append(d.text)
+print(dateLista)
+
+links = soup.find_all("a", string="Apply")
+linksLista = []
+for link in links:
+    link_url = link["href"]
+    linksLista.append(link_url)
+print(linksLista)
+
+opisLista = []
+for link in links:
+    link_url = link["href"]
+    strona = requests.get(link_url)
+    dup = BeautifulSoup(strona.content, "html.parser")
+    tekst = dup.find_all("div", class_="content")
+    for t in tekst:
+        opis = t.text.strip()
+        opisLista.append(opis)
+print(opisLista)
+
+df = pd.DataFrame({'Nazwa pozycji': positionLista, 'Nazwa firmy': companyLista, 'Lokalizacja': locationLista,
+                  'Data dodania': dateLista, 'Link do oferty': linksLista, 'Opis oferty': opisLista})
+df
+
+df.to_csv('ZadanieFakeJobs.csv')
